@@ -317,21 +317,24 @@ def model_treatment_paper(state,
             hist_vals = hist_df["m1"].values
             t_hist = np.arange(len(hist_vals))
 
-            plt.figure(figsize=(10,4))
-            plt.plot(results["t_week"], results["pred_m1"], label="Model predicted m1")
-            plt.plot(t_hist, hist_vals, "o-", label="Observed m1 (hist)")
-            plt.plot(results["t_week"], results["E1"], label="New latent E1")
-            plt.plot(results["t_week"], results["I"], label="Undiagnosed active I")
+            fig, ax = plt.subplots(figsize=(10, 4))
+            ax.plot(results["t_week"], results["pred_m1"], label="Model predicted m1")
+            ax.plot(t_hist, hist_vals, "o-", label="Observed m1 (hist)")
+            ax.plot(results["t_week"], results["E1"], label="New latent E1")
+            ax.plot(results["t_week"], results["I"], label="Undiagnosed active I")
 
-            plt.xlabel("Weeks")
-            plt.ylabel("Counts")
+            ax.set_xlabel("Weeks")
+            ax.set_ylabel("Counts")
             if y_log:
-              plt.plot(results["t_week"], results["T"], label="Treated T")
-              plt.yscale("log")
-            plt.title(f"{state} TB model (paper treatment model) obs_model={obs_model}")
-            plt.legend()
-            plt.tight_layout()
-            plt.show()
+              ax.plot(results["t_week"], results["T"], label="Treated T")
+              ax.yscale("log")
+            ax.set_title(f"{state} TB model (paper treatment model) obs_model={obs_model}")
+            ax.legend()
+            fig.tight_layout()
+            # removed to show in streamlit script
+            # plt.show()
+            return fig
+
         except Exception as e:
             if verbose:
                 print("Plot overlay failed:", e)

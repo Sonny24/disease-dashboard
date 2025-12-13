@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import us
-import compartmental_models.comp_model
+from compartmental_models import comp_model
 
 st.set_page_config(page_title="CDC Weekly Disease Dashboard", layout="wide")
 st.title("CDC Weekly Disease Transmission Dashboard")
@@ -208,3 +208,16 @@ summary = (
     .sort_values("Max Weekly Cases", ascending=False)
 )
 st.dataframe(summary, hide_index=True)
+
+
+#test
+fig = comp_model.model_treatment_paper(
+    state="California",
+    weeks=30,
+    plot=True
+)
+
+if fig is not None:
+    st.pyplot(fig)
+else:
+    st.warning("No data available for this selection")
