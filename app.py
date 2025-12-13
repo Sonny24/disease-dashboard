@@ -1,22 +1,22 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import us
 
 st.set_page_config(page_title="CDC Weekly Disease Dashboard", layout="wide")
 st.title("CDC Weekly Disease Transmission Dashboard")
 
-
+# TODO: ADJUST INTRO FOR MODELS 
 st.markdown("""
 
 This dashboard provides an interactive view of weekly case counts for **12 priority infectious disease groups** 
 across the United States.  
 You can:
-- Upload the weekly CDC NNDSS dataset (CSV)
 - View **national trends** by disease group
 - Compare **state-level patterns** side-by-side
 - Review **peak weekly case counts** for each disease group
-
-Upload a data file below to begin.
+            
+**Please note that all models used have a degree of uncertainty. Use multiple sources to make any vital decisions.**
 """)
 
 MODEL_FILES = {
@@ -116,10 +116,63 @@ fig.update_layout(
     legend_title="Disease"
 )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width='stretch')
 
 
 states = sorted(df["LOCATION1"].dropna().astype(str).str.upper().unique())
+
+# US MAP
+st.subheader("🗺️ U.S. Map — State-Level Cases")
+
+disease_list = sorted(df["Disease Group"].unique())
+selected_disease = st.selectbox("Select Disease", disease_list)
+
+week_list = sorted(df["MMWR WEEK"].unique())
+selected_week = st.selectbox("Select Week", week_list)
+
+map_data = df[
+    (df["Disease Group"] == selected_disease) &
+    (df["MMWR WEEK"] == selected_week) &
+    (df["Reporting Area"] != "TOTAL")
+].copy()
+
+state_summary = (
+    map_data.groupby("LOCATION1")["Current week"]
+    .sum()
+    .reset_index()
+)
+
+def to_abbrev(x):
+    try:
+        return us.states.lookup(x).abbr
+    except:
+        return None
+
+state_summary["abbr"] = state_summary["LOCATION1"].apply(lambda x: to_abbrev(x))
+state_summary = state_summary.dropna(subset=["abbr"])
+
+fig = px.scatter_geo(
+    state_summary,
+    locations="abbr",
+    locationmode="USA-states",
+    size="Current week",
+    color="Current week",
+    hover_name="abbr",
+    hover_data={"Current week": True},
+    scope="usa",
+    title=f"{selected_disease} — Week {selected_week}",
+)
+
+fig.update_layout(
+    geo=dict(
+        scope="usa",
+        projection_type="albers usa",
+        showland=True
+    ),
+    coloraxis_colorbar_title="Cases"
+)
+
+st.plotly_chart(fig, width='stretch')
 
 st.subheader("State-Level Comparison")
 col1, col2 = st.columns(2)
@@ -151,9 +204,9 @@ def make_state_fig(state):
 
 col3, col4 = st.columns(2)
 with col3:
-    st.plotly_chart(make_state_fig(state1), use_container_width=True)
+    st.plotly_chart(make_state_fig(state1), width='stretch')
 with col4:
-    st.plotly_chart(make_state_fig(state2), use_container_width=True)
+    st.plotly_chart(make_state_fig(state2), width='stretch')
 
 
 st.write("### Summary Table — Peak Weekly Values")
