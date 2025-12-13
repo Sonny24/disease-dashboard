@@ -331,8 +331,7 @@ def model_treatment_paper(state,
             ax.set_title(f"{state} TB model (paper treatment model) obs_model={obs_model}")
             ax.legend()
             fig.tight_layout()
-            # removed to show in streamlit script
-            # plt.show()
+
             return fig
 
         except Exception as e:
@@ -539,19 +538,20 @@ def model_zika(state, weeks=104, weeks_back=20, verbose=False,
             hist_vals = df_hist["m1"].values
             t_hist = np.arange(len(hist_vals))
 
-            plt.figure(figsize=(9,4))
-            plt.plot(results["t_week"], results["pred_m1"], label="Model predicted m1")
-            plt.plot(t_hist, hist_vals, "o-", label="Observed m1")
-            plt.plot(results["t_week"], results["E_h"], label = "Exposed (E_h)")
-            plt.plot(results["t_week"], results["I_h"], label = "Infected (I_h)")
-            plt.plot(results["t_week"], results["R_h"], label = "Recovered (R_h)")
-            plt.legend()
-            plt.xlabel("Weeks")
-            plt.ylabel("Zika Cases")
-            plt.title(f"{state} Zika Model ({obs_model}) - SEIR Compartments ")
-            plt.tight_layout()
-            # plt.show()
-            return results, plt
+            fig, ax = plt.subplots(figsize=(9,4))
+            ax.plot(results["t_week"], results["pred_m1"], label="Model predicted m1")
+            ax.plot(t_hist, hist_vals, "o-", label="Observed m1")
+            ax.plot(results["t_week"], results["E_h"], label = "Exposed (E_h)")
+            ax.plot(results["t_week"], results["I_h"], label = "Infected (I_h)")
+            ax.plot(results["t_week"], results["R_h"], label = "Recovered (R_h)")
+            ax.legend()
+            ax.set_xlabel("Weeks")
+            ax.set_ylabel("Zika Cases")
+            ax.set_title(f"{state} Zika Model ({obs_model}) - SEIR Compartments ")
+            fig.tight_layout()
+
+            return fig
+            
         except Exception as e:
             if verbose:
                 print("Plot overlay failed:", e)
@@ -587,7 +587,7 @@ def run_zika_pipeline(state,
     if verbose:
         print("Fitted parameters:", params)
 
-    results = model_zika(
+    fig = model_zika(
         state,
         weeks=forecast_weeks,
         weeks_back=weeks_back,
@@ -601,7 +601,7 @@ def run_zika_pipeline(state,
         plot=True
     )
 
-    return results, params
+    return fig, params
 
 
 
@@ -731,20 +731,21 @@ def model_zika(state, weeks=104, weeks_back=20,
 
     # Plot
     if plot:
-        plt.figure(figsize=(9,4))
-        plt.plot(results["t_week"], results["pred_m1"], label="Model predicted m1")
+        fig, ax = plt.subplots(figsize=(9, 4))
+
+        ax.plot(results["t_week"], results["pred_m1"], label="Model predicted m1")
         hist_vals = df_state["m1"].values
         t_hist = np.arange(len(hist_vals))
-        plt.plot(t_hist, hist_vals, "o-", label="Observed m1")
-        plt.plot(results["t_week"], results["E_h"], label="Exposed (E_h)")
-        plt.plot(results["t_week"], results["I_h"], label="Infected (I_h)")
-        plt.plot(results["t_week"], results["R_h"], label="Recovered (R_h)")
-        plt.legend()
-        plt.xlabel("Weeks")
-        plt.ylabel("Zika Cases")
-        plt.title(f"{state} Zika Model ({obs_model})")
-        plt.tight_layout()
-        plt.show()
+        ax.plot(t_hist, hist_vals, "o-", label="Observed m1")
+        ax.plot(results["t_week"], results["E_h"], label="Exposed (E_h)")
+        ax.plot(results["t_week"], results["I_h"], label="Infected (I_h)")
+        ax.plot(results["t_week"], results["R_h"], label="Recovered (R_h)")
+        ax.legend()
+        ax.set_xlabel("Weeks")
+        ax.set_ylabel("Zika Cases")
+        ax.set_title(f"{state} Zika Model ({obs_model})")
+        fig.tight_layout()
+        return fig
 
     return results
 
@@ -937,19 +938,19 @@ def model_measles(state, weeks=104, verbose=False,
           hist_vals = hist_df["m1"].values
           t_hist = np.arange(len(hist_vals))
 
-          plt.figure(figsize=(12,6))
-          plt.plot(results["t_week"], results["pred_m1"], label="Model predicted m1")
-          plt.plot(t_hist, hist_vals, "o-", label="Observed m1")
-          #plt.plot(results["t_week"], results["S"], label="Susceptible (S)")
-          plt.plot(results["t_week"], results["E"], label="Exposed (E)")
-          plt.plot(results["t_week"], results["I"], label="Infected (I)")
-          plt.plot(results["t_week"], results["R"], label="Recovered (R)")
-          plt.xlabel("Weeks")
-          plt.ylabel("Population / Cases")
-          plt.title(f"{state} Measles Model (obs_model={obs_model}) - SEIR Compartments")
-          plt.legend()
-          plt.tight_layout()
-          plt.show()
+          fig, ax = plt.subplots(figsize=(12, 6))
+          ax.plot(results["t_week"], results["pred_m1"], label="Model predicted m1")
+          ax.plot(t_hist, hist_vals, "o-", label="Observed m1")
+          #ax.plot(results["t_week"], results["S"], label="Susceptible (S)")
+          ax.plot(results["t_week"], results["E"], label="Exposed (E)")
+          ax.plot(results["t_week"], results["I"], label="Infected (I)")
+          ax.plot(results["t_week"], results["R"], label="Recovered (R)")
+          ax.set_xlabel("Weeks")
+          ax.set_ylabel("Population / Cases")
+          ax.set_title(f"{state} Measles Model (obs_model={obs_model}) - SEIR Compartments")
+          ax.legend()
+          fig.tight_layout()
+          return fig
       except Exception as e:
           if verbose:
               print("Plot overlay failed:", e)
@@ -985,7 +986,8 @@ def run_measles_pipeline(state, weeks_back=30,
       plot = True,
       verbose=verbose
   )
-  return results, params
+#   return results, params
+  return results
 
 
 
@@ -1180,19 +1182,20 @@ def model_hepB(state, weeks_back, weeks_forward, params, verbose = False, y_log 
       try:
           # The original code attempts to plot 'pred_m1' which is not defined in this model.
           # Plotting the compartments directly for now.
-          plt.figure(figsize=(12,6))
-          plt.plot(results["t_week"], results["A"], label="Acute (A)")
-          plt.plot(results["t_week"], results["B"], label="Chronic (B)")
-          plt.xlabel("Weeks")
-          plt.ylabel("Population / Cases")
+          fig, ax = plt.subplots(figsize=(12, 6))
+          ax.plot(results["t_week"], results["A"], label="Acute (A)")
+          ax.plot(results["t_week"], results["B"], label="Chronic (B)")
+          ax.set_xlabel("Weeks")
+          ax.set_ylabel("Population / Cases")
           if y_log:
-            plt.plot(results["t_week"], results["S"], label="Susceptible (S)")
-            plt.plot(results["t_week"], results["R"], label="Recovered (R)")
-            plt.yscale("log")
-          plt.title(f"{state} Hepatitis B")
-          plt.legend()
-          plt.tight_layout()
-          plt.show()
+            ax.plot(results["t_week"], results["S"], label="Susceptible (S)")
+            ax.plot(results["t_week"], results["R"], label="Recovered (R)")
+            ax.yscale("log")
+          ax.set_title(f"{state} Hepatitis B")
+          ax.legend()
+
+          fig.tight_layout()
+          return fig
       except Exception as e:
           if verbose:
               print("Plot overlay failed:", e)
@@ -1212,7 +1215,7 @@ def run_hepB_pipeline(state, weeks_back, weeks_forward, verbose=False):
   if verbose:
     print("Fitted parameters:", params)
 
-  results = model_hepB(
+  fig = model_hepB(
       state,
       weeks_back,
       weeks_forward,
@@ -1220,9 +1223,11 @@ def run_hepB_pipeline(state, weeks_back, weeks_forward, verbose=False):
       plot = True,
       verbose=verbose
   )
-  return results, params
+  return fig
+#   return results, params
+    
 
 
-results, params = run_hepB_pipeline("Maryland", weeks_back=10, weeks_forward=10, verbose=True)
+# results, params = run_hepB_pipeline("Maryland", weeks_back=10, weeks_forward=10, verbose=True)
 
 
