@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import us
+import compartmental_models.comp_model
 
 st.set_page_config(page_title="CDC Weekly Disease Dashboard", layout="wide")
 st.title("CDC Weekly Disease Transmission Dashboard")
@@ -19,18 +20,7 @@ You can:
 **Please note that all models used have a degree of uncertainty. Use multiple sources to make any vital decisions.**
 """)
 
-MODEL_FILES = {
-    "Normal Model": "model_data/NNDSS_Weekly_Data_20251110.csv",
-    "Mathematical Model": "model_data/NNDSS_Weekly_Data_20251110.csv",
-    "ML Model": "model_data/NNDSS_Weekly_Data_20251110.csv"
-}
-
-selected_model = st.selectbox(
-    "Select Forecasting Model",
-    list(MODEL_FILES.keys())
-)
-
-df = pd.read_csv(MODEL_FILES.get(selected_model))
+df = pd.read_csv("model_data/NNDSS_Weekly_Data_20251110.csv")
 
 df = df[
     [
