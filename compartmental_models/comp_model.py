@@ -139,20 +139,11 @@ def get_vaccination_rates(vacc_name, state):
 
   return results_vacc["year_season"].iloc[0], rate
 #   return results_vacc["year_season"][0], results_vacc["coverage_estimate"][0]
-
-  
-
-
-
  
 # #Tuberculosis
 
 
 ##BASED ON PAPER
-import numpy as np
-import pandas as pd
-from scipy.integrate import solve_ivp
-import matplotlib.pyplot as plt
 
 # --- helper: convert per-year to per-week
 def yr_to_week(rate_per_year):
@@ -196,7 +187,7 @@ def model_treatment_paper(state,
                           obs_model="prevalence",
                           reporting_rate=1.0,
                           plot=True,
-                          y_log = False,
+                          y_log = True,
                           verbose=False):
     """
     Implements the 8-compartment TB treatment model from Egonmwan & Okuonghae (2018).
@@ -337,7 +328,7 @@ def model_treatment_paper(state,
             ax.set_ylabel("Counts")
             if y_log:
               ax.plot(results["t_week"], results["T"], label="Treated T")
-              ax.yscale("log")
+              ax.set_yscale("log")
             ax.set_title(f"{state} TB model (paper treatment model) obs_model={obs_model}")
             ax.legend()
             fig.tight_layout()
@@ -351,18 +342,7 @@ def model_treatment_paper(state,
     return results, p
 
 
-results, p = model_treatment_paper("California", weeks = 30, y_log=True)
-
-
-results, p = model_treatment_paper("Texas", weeks = 30, y_log=True)
-
-
 # #Zika
-
-
-from scipy.integrate import solve_ivp
-from scipy.optimize import least_squares
-import matplotlib.pyplot as plt
 
 
 # =============================================================

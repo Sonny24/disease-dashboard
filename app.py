@@ -211,45 +211,53 @@ st.dataframe(summary, hide_index=True)
 
 selected_state = st.selectbox("Select State", states)
 
-# #test, note to self, multiple plotting methods for each disease, figure out which func is correct
-# fig = comp_model.model_treatment_paper(
-#     state="California",
-#     weeks=30,
-#     plot=True
+tb_fig = comp_model.model_treatment_paper(
+    selected_state,
+    weeks=30,
+    y_log=True,
+    plot=True
+)
+
+if tb_fig is not None:
+    st.pyplot(tb_fig)
+else:
+    st.warning("No data available for this selection")
+
+# NOTE: doesn't work with any other state besides maryland because lack of data 
+# zika_fig = comp_model.run_zika_pipeline(
+#     selected_state,
+#     weeks_back=100,
+#     forecast_weeks=104,
+#     obs_model="incidence",
+#     reporting_rate=0.8
 # )
 
-# if fig is not None:
-#     st.pyplot(fig)
+# if zika_fig is not None:
+#     st.pyplot(zika_fig)
 # else:
 #     st.warning("No data available for this selection")
 
 
-zika_fig = comp_model.run_zika_pipeline(
-    state=selected_state
-)
+# measle_fig = comp_model.run_measles_pipeline(
+#     selected_state,
+#     weeks_back=80,
+#     forecast_weeks=104,
+#     obs_model="incidence",
+#     reporting_rate=0.8
+# )
 
-if zika_fig is not None:
-    st.pyplot(zika_fig)
-else:
-    st.warning("No data available for this selection")
+# if measle_fig is not None:
+#     st.pyplot(measle_fig)
+# else:
+# #     st.warning("No data available for this selection")
 
+# hepB_fig = comp_model.run_hepB_pipeline(
+#     state=selected_state,
+#     weeks_back=10, 
+#     weeks_forward=10
+# )
 
-measle_fig = comp_model.run_measles_pipeline(
-    state=selected_state
-)
-
-if measle_fig is not None:
-    st.pyplot(measle_fig)
-else:
-    st.warning("No data available for this selection")
-
-hepB_fig = comp_model.run_hepB_pipeline(
-    state=selected_state,
-    weeks_back=10, 
-    weeks_forward=10
-)
-
-if hepB_fig is not None:
-    st.pyplot(hepB_fig)
-else:
-    st.warning("No data available for this selection")
+# if hepB_fig is not None:
+#     st.pyplot(hepB_fig)
+# else:
+#     st.warning("No data available for this selection")
