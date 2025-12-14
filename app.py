@@ -224,40 +224,40 @@ else:
     st.warning("No data available for this selection")
 
 # NOTE: doesn't work with any other state besides maryland because lack of data 
-# zika_fig = comp_model.run_zika_pipeline(
-#     selected_state,
-#     weeks_back=100,
-#     forecast_weeks=104,
-#     obs_model="incidence",
-#     reporting_rate=0.8
-# )
+zika_fig = comp_model.run_zika_pipeline(
+    selected_state,
+    weeks_back=100,
+    forecast_weeks=104,
+    obs_model="incidence",
+    reporting_rate=0.8
+)
 
-# if zika_fig is not None:
-#     st.pyplot(zika_fig)
-# else:
-#     st.warning("No data available for this selection")
+if zika_fig is not None:
+    st.pyplot(zika_fig)
+else:
+    st.warning("No data available for this selection")
 
 
-# measle_fig = comp_model.run_measles_pipeline(
-#     selected_state,
-#     weeks_back=80,
-#     forecast_weeks=104,
-#     obs_model="incidence",
-#     reporting_rate=0.8
-# )
+measle_fig = comp_model.run_measles_pipeline(
+    selected_state,
+    weeks_back=80,
+    forecast_weeks=104,
+    obs_model="incidence",
+    reporting_rate=0.8
+)
 
-# if measle_fig is not None:
-#     st.pyplot(measle_fig)
-# else:
-# #     st.warning("No data available for this selection")
+if measle_fig is not None:
+    st.pyplot(measle_fig)
+else:
+     st.warning("No data available for this selection")
 
-# hepB_fig = comp_model.run_hepB_pipeline(
-#     state=selected_state,
-#     weeks_back=10, 
-#     weeks_forward=10
-# )
+hepB_fig = comp_model.run_hepB_pipeline(
+    state=selected_state,
+    weeks_back=10, 
+    weeks_forward=10
+)
 
-# if hepB_fig is not None:
-#     st.pyplot(hepB_fig)
-# else:
-#     st.warning("No data available for this selection")
+if hepB_fig is not None:
+    st.pyplot(hepB_fig)
+else:
+    st.warning("No data available for this selection")
