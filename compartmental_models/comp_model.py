@@ -129,8 +129,18 @@ def get_vaccination_rates(vacc_name, state):
   #sort and return most recent statistic
   results_vacc = results_vacc.sort_values(by="year_season", ascending=False)
   results_vacc = results_vacc.reset_index(drop=True)
+  
+  if results_vacc.empty:
+        return None, None
 
-  return results_vacc["year_season"][0], results_vacc["coverage_estimate"][0]
+  rate = results_vacc["coverage_estimate"].iloc[0]
+  if pd.isna(rate):
+        return None, None
+
+  return results_vacc["year_season"].iloc[0], rate
+#   return results_vacc["year_season"][0], results_vacc["coverage_estimate"][0]
+
+  
 
 
 
@@ -582,7 +592,7 @@ def run_zika_pipeline(state,
     #if no state data, returns None
     if params is None:
       print(f"No recent data found for: {state} within the last {weeks_back} weeks")
-      return None, None
+      return None
 
     if verbose:
         print("Fitted parameters:", params)
@@ -601,7 +611,7 @@ def run_zika_pipeline(state,
         plot=True
     )
 
-    return fig, params
+    return fig
 
 
 
@@ -751,14 +761,14 @@ def model_zika(state, weeks=104, weeks_back=20,
 
 
 
-#The only zika case in the last year was in Maryland
-results, params = run_zika_pipeline(
-    "Maryland",
-    weeks_back=100,
-    forecast_weeks=104,
-    obs_model="incidence",
-    reporting_rate=0.8
-)
+# #The only zika case in the last year was in Maryland
+# results, params = run_zika_pipeline(
+#     "Maryland",
+#     weeks_back=100,
+#     forecast_weeks=104,
+#     obs_model="incidence",
+#     reporting_rate=0.8
+# )
 
 
  
@@ -972,7 +982,7 @@ def run_measles_pipeline(state, weeks_back=30,
   )
   if params is None:
     print(f"No recent data found for: {state} within the last {weeks_back} weeks")
-    return None, None
+    return None
   if verbose:
     print("Fitted parameters:", params)
 
@@ -1114,6 +1124,7 @@ import matplotlib.pyplot as plt
 def model_hepB(state, weeks_back, weeks_forward, params, verbose = False, y_log = False, plot = False):
 
   #initial conditions
+  print("DEBUG HepB v:", params["v"], "state_pop:", params["state_pop"])
   # R0 is initialized based on vaccination coverage, so 'v' is likely an initial proportion, not a continuous rate
   R0 = params["v"] * params["state_pop"]
   B0 = params["chronic_cases"] + 0.9*params["perinatal_cases"]
@@ -1159,6 +1170,10 @@ def model_hepB(state, weeks_back, weeks_forward, params, verbose = False, y_log 
   t_eval = np.arange(0, weeks_forward + 1)
   y0 = [S0, A0, B0, R0]
 
+  for i, v in enumerate(y0):
+    if not np.isfinite(v):
+        raise ValueError(f"y0[{i}] is not finite: {v}")
+  
   sol = solve_ivp(
     deriv,
     (0, weeks_forward),
@@ -1211,7 +1226,7 @@ def run_hepB_pipeline(state, weeks_back, weeks_forward, verbose=False):
   params = set_parameters(state, weeks_back)
   if params is None:
     print(f"No recent data found for: {state} within the last {weeks_back} weeks")
-    return None, None
+    return None
   if verbose:
     print("Fitted parameters:", params)
 

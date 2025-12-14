@@ -109,7 +109,7 @@ fig.update_layout(
 st.plotly_chart(fig, width='stretch')
 
 
-states = sorted(df["LOCATION1"].dropna().astype(str).str.upper().unique())
+states = [state.name for state in us.states.STATES]
 
 # US MAP
 st.subheader("U.S. Map — State-Level Cases")
@@ -174,7 +174,7 @@ with col2:
 
 
 def make_state_fig(state):
-    sub = df[(df["LOCATION1"].str.upper() == state) & (df["Current MMWR Year"] == year)]
+    sub = df[(df["LOCATION1"].str.upper() == state.upper()) & (df["Current MMWR Year"] == year)]
     fig = px.line(
         sub,
         x="MMWR WEEK",
@@ -209,6 +209,7 @@ summary = (
 )
 st.dataframe(summary, hide_index=True)
 
+selected_state = st.selectbox("Select State", states)
 
 # #test, note to self, multiple plotting methods for each disease, figure out which func is correct
 # fig = comp_model.model_treatment_paper(
@@ -224,8 +225,8 @@ st.dataframe(summary, hide_index=True)
 
 
 zika_fig = comp_model.run_zika_pipeline(
-    state="California"
-)[0]
+    state=selected_state
+)
 
 if zika_fig is not None:
     st.pyplot(zika_fig)
@@ -234,7 +235,7 @@ else:
 
 
 measle_fig = comp_model.run_measles_pipeline(
-    state="California"
+    state=selected_state
 )
 
 if measle_fig is not None:
@@ -243,7 +244,7 @@ else:
     st.warning("No data available for this selection")
 
 hepB_fig = comp_model.run_hepB_pipeline(
-    state="California",
+    state=selected_state,
     weeks_back=10, 
     weeks_forward=10
 )
