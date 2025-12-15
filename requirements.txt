@@ -8,3 +8,4 @@ datetime
 matplotlib
 scipy
 streamlit
+streamlit-carousel
