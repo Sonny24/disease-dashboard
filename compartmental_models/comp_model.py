@@ -7,6 +7,7 @@ from sodapy import Socrata
 import datetime
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
+from scipy.optimize import least_squares
 
 # dataset api
 
@@ -738,28 +739,8 @@ def model_zika(state, weeks=104, weeks_back=20,
         return fig
 
     return results
-
-
-
-# #The only zika case in the last year was in Maryland
-# results, params = run_zika_pipeline(
-#     "Maryland",
-#     weeks_back=100,
-#     forecast_weeks=104,
-#     obs_model="incidence",
-#     reporting_rate=0.8
-# )
-
-
  
 # #Measles
-
-
-import numpy as np
-import pandas as pd
-from scipy.integrate import solve_ivp
-from scipy.optimize import least_squares
-import matplotlib.pyplot as plt
 
 
 """
@@ -1093,13 +1074,6 @@ def set_parameters(state, weeks_back):
       "perinatal_cases": perinatal_cases,
       "state_pop": state_pop.item()
   }
-
-
-import numpy as np
-import pandas as pd
-from scipy.integrate import solve_ivp
-from scipy.optimize import least_squares
-import matplotlib.pyplot as plt
 
 def model_hepB(state, weeks_back, weeks_forward, params, verbose = False, y_log = False, plot = False):
 
