@@ -4,7 +4,6 @@ sodapy
 pandas
 numpy
 requests
-json
 datetime
 matplotlib
 scipy
