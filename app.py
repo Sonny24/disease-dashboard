@@ -198,17 +198,6 @@ with col3:
 with col4:
     st.plotly_chart(make_state_fig(state2), width='stretch')
 
-
-st.write("### Summary Table — Peak Weekly Values")
-summary = (
-    filtered.groupby("Disease Group")["Current week"]
-    .max()
-    .reset_index()
-    .rename(columns={"Current week": "Max Weekly Cases"})
-    .sort_values("Max Weekly Cases", ascending=False)
-)
-st.dataframe(summary, hide_index=True)
-
 selected_state = st.selectbox("Select State", states)
 
 tb_fig = comp_model.model_treatment_paper(
@@ -264,3 +253,13 @@ with hepb_tab:
         st.pyplot(hepB_fig)
     else:
         st.warning("No data available for this selection")
+
+st.write("### Summary Table — Peak Weekly Values")
+summary = (
+    filtered.groupby("Disease Group")["Current week"]
+    .max()
+    .reset_index()
+    .rename(columns={"Current week": "Max Weekly Cases"})
+    .sort_values("Max Weekly Cases", ascending=False)
+)
+st.dataframe(summary, hide_index=True)
