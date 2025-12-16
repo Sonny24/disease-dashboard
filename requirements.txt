@@ -9,3 +9,4 @@ matplotlib
 scipy
 streamlit
 joblib
+sklearn
