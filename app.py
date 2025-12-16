@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import us
 from compartmental_models import comp_model
+from predict_model.predict_section import render_nowcast_section
 
 st.set_page_config(page_title="CDC Weekly Disease Dashboard", layout="wide")
 st.title("CDC Weekly Disease Transmission Dashboard")
@@ -200,59 +201,102 @@ with col3:
 with col4:
     st.plotly_chart(make_state_fig(state2), width='stretch')
 
+# PREDICTION MODEL SECTION
+st.divider()
+render_nowcast_section()
+
+# COMPARTMENTAL MODEL SECTION 
+st.divider()
 selected_state = st.selectbox("Select State", states)
 
-tb_fig = comp_model.model_treatment_paper(
-    selected_state,
-    weeks=30,
-    y_log=True,
-    plot=True
-)
+@st.cache_resource(show_spinner="Running TB compartmental model...")
+def run_tb_model(state):
+    return comp_model.model_treatment_paper(
+        state,
+        weeks=30,
+        y_log=True,
+        plot=True
+    )
 
-# NOTE: doesn't work with any other state besides maryland because lack of data
-zika_fig = comp_model.run_zika_pipeline(
-    selected_state,
-    weeks_back=100,
-    forecast_weeks=104,
-    obs_model="incidence",
-    reporting_rate=0.8
-)
 
-measle_fig = comp_model.run_measles_pipeline(
-    selected_state,
-    weeks_back=80,
-    forecast_weeks=104,
-    obs_model="incidence",
-    reporting_rate=0.8
-)
+@st.cache_resource(show_spinner="Running Zika model...")
+def run_zika_model(state):
+    return comp_model.run_zika_pipeline(
+        state,
+        weeks_back=100,
+        forecast_weeks=104,
+        obs_model="incidence",
+        reporting_rate=0.8
+    )
 
-hepB_fig = comp_model.run_hepB_pipeline(
-    state=selected_state,
-    weeks_back=10, 
-    weeks_forward=10
-)
+
+@st.cache_resource(show_spinner="Running Measles model...")
+def run_measles_model(state):
+    return comp_model.run_measles_pipeline(
+        state,
+        weeks_back=80,
+        forecast_weeks=104,
+        obs_model="incidence",
+        reporting_rate=0.8
+    )
+
+
+@st.cache_resource(show_spinner="Running Hepatitis B model...")
+def run_hepb_model(state):
+    return comp_model.run_hepB_pipeline(
+        state=state,
+        weeks_back=10,
+        weeks_forward=10
+    )
 
 tb_tab, zika_tab, measles_tab, hepb_tab = st.tabs(["Tuberculosis", "Zika", "Measles", "Hepatitis B"])
 
 with tb_tab:
-    st.header("Tuberculosis Projection")
+    try:
+        tb_fig = run_tb_model(selected_state)
+    except Exception as e:
+        tb_fig = None
+        st.warning(f"Insufficient data for this selection")
+        
     if tb_fig is not None:
-        st.pyplot(tb_fig)
+        try:
+            st.pyplot(tb_fig)
+        except Exception as e:
+            st.warning(f"Insufficient data for this selection")
     else:
         st.warning("No data available for this selection")
+
 with zika_tab:
+    try:
+        zika_fig = run_zika_model(selected_state)
+    except Exception as e:
+        zika_fig = None
+        st.warning(f"Insufficient data for this selection")
+
     if zika_fig is not None:
         st.pyplot(zika_fig)
     else:
         st.warning("No data available for this selection")
 with measles_tab:
-    if measle_fig is not None:
-        st.pyplot(measle_fig)
+    try:
+        measles_fig = run_measles_model(selected_state)
+    except Exception as e:
+        measles_fig = None
+        st.warning(f"Insufficient data for this selection")
+
+    if measles_fig is not None:
+        st.pyplot(measles_fig)
     else:
         st.warning("No data available for this selection")
 with hepb_tab:
-    if hepB_fig is not None:
-        st.pyplot(hepB_fig)
+    try:
+        hepb_fig = run_hepb_model(selected_state)
+    except Exception as e:
+        hepb_fig = None
+        st.warning(f"Insufficient data for this selection")
+
+    if hepb_fig is not None:
+        st.pyplot(hepb_fig)
     else:
         st.warning("No data available for this selection")
 

@@ -11,30 +11,30 @@ st.caption("Pick a disease group + state. App shows P(cases), predicted 0/1, and
 # ----------------------------
 # Load data
 # ----------------------------
-df = pd.read_csv("WeekToPredict.csv")
+df = pd.read_csv("predict_model/WeekToPredict.csv")
 
 # ----------------------------
 # Load models
 # ----------------------------
-arb_clf_rf = joblib.load("arb_clf_rf.joblib")
-arb_clf_xgb_gate = joblib.load("arb_clf_xgb_noprob.joblib")   # gate (has predict_proba)
-arb_lin_rf = joblib.load("arb_lin_rf.joblib")
+arb_clf_rf = joblib.load("predict_model/arb_clf_rf.joblib")
+arb_clf_xgb_gate = joblib.load("predict_model/arb_clf_xgb_noprob.joblib")   # gate (has predict_proba)
+arb_lin_rf = joblib.load("predict_model/arb_lin_rf.joblib")
 
-can_clf_rf = joblib.load("can_clf_rf.joblib")
-can_lin_rf = joblib.load("can_lin_rf.joblib")
+can_clf_rf = joblib.load("predict_model/can_clf_rf.joblib")
+can_lin_rf = joblib.load("predict_model/can_lin_rf.joblib")
 
-flu_clf_rf = joblib.load("flu_clf_rf.joblib")
-flu_lin_rf = joblib.load("flu_reg_rf.joblib")
+flu_clf_rf = joblib.load("predict_model/flu_clf_rf.joblib")
+flu_lin_rf = joblib.load("predict_model/flu_reg_rf.joblib")
 
-hep_clf_xgb = joblib.load("hep_clf_xgb.joblib")
-hep_lin_rf = joblib.load("hep_lin_rf.joblib")
+hep_clf_xgb = joblib.load("predict_model/hep_clf_xgb.joblib")
+hep_lin_rf = joblib.load("predict_model/hep_lin_rf.joblib")
 
-tub_clf_xgb = joblib.load("tub_clf_xgb.joblib")
-tub_lin_rf = joblib.load("tub_lin_rf.joblib")
+tub_clf_xgb = joblib.load("predict_model/tub_clf_xgb.joblib")
+tub_lin_rf = joblib.load("predict_model/tub_lin_rf.joblib")
 
-mea_clf_xgb = joblib.load("mea_clf_xgb.joblib")
-mea_clf_xgb_gate = joblib.load("mea_clf_xgb_noprob.joblib")   # gate (has predict_proba)
-mea_lin_rf = joblib.load("mea_lin_rf.joblib")
+mea_clf_xgb = joblib.load("predict_model/mea_clf_xgb.joblib")
+mea_clf_xgb_gate = joblib.load("predict_model/mea_clf_xgb_noprob.joblib")   # gate (has predict_proba)
+mea_lin_rf = joblib.load("predict_model/mea_lin_rf.joblib")
 
 # ----------------------------
 # Feature columns (MUST match training)
@@ -118,62 +118,63 @@ def proba_1(model, X):
 # ----------------------------
 # UI inputs
 # ----------------------------
-col1, col2 = st.columns(2)
-with col1:
-    disease = st.selectbox("Disease group", DISEASES, index=DISEASES.index("Influenza"))
-with col2:
-    state = st.selectbox("State", STATES, index=STATES.index("Virginia"))
+def render():
+    col1, col2 = st.columns(2)
+    with col1:
+        disease = st.selectbox("Disease group", DISEASES, index=DISEASES.index("Influenza"))
+    with col2:
+        state = st.selectbox("State", STATES, index=STATES.index("Virginia"))
 
-st.divider()
+    st.divider()
 
-cfg = MODEL_REGISTRY[disease]
-row_df = get_nextweek_row(df, disease, state)
-if row_df is None:
-    st.error("No row found in WeekToPredict.csv for that disease + state.")
-    st.stop()
+    cfg = MODEL_REGISTRY[disease]
+    row_df = get_nextweek_row(df, disease, state)
+    if row_df is None:
+        st.error("No row found in WeekToPredict.csv for that disease + state.")
+        st.stop()
 
-X_row = make_X(row_df, feature_cols)
+    X_row = make_X(row_df, feature_cols)
 
-# ----------------------------
-# Classification (NO sliders)
-# ----------------------------
-# Always compute probability model (for display)
-p_case = proba_1(cfg["clf"], X_row)
+    # ----------------------------
+    # Classification (NO sliders)
+    # ----------------------------
+    # Always compute probability model (for display)
+    p_case = proba_1(cfg["clf"], X_row)
 
-# Final 0/1 decision:
-# - if gate exists: use gate proba + gate_thr
-# - else: use prob model proba + prob_thr
-if "gate_clf" in cfg:
-    gate_thr = float(cfg["gate_thr"])
-    gate_p = proba_1(cfg["gate_clf"], X_row)
-    has_case = int(gate_p >= gate_thr)
-else:
-    gate_p = np.nan
-    prob_thr = float(cfg.get("prob_thr", 0.50))
-    has_case = int(p_case >= prob_thr)
+    # Final 0/1 decision:
+    # - if gate exists: use gate proba + gate_thr
+    # - else: use prob model proba + prob_thr
+    if "gate_clf" in cfg:
+        gate_thr = float(cfg["gate_thr"])
+        gate_p = proba_1(cfg["gate_clf"], X_row)
+        has_case = int(gate_p >= gate_thr)
+    else:
+        gate_p = np.nan
+        prob_thr = float(cfg.get("prob_thr", 0.50))
+        has_case = int(p_case >= prob_thr)
 
-# ----------------------------
-# Regression
-# ----------------------------
-reg = cfg["reg"]
-pred_cases = float(reg.predict(X_row)[0])
-pred_cases = max(0.0, pred_cases)
+    # ----------------------------
+    # Regression
+    # ----------------------------
+    reg = cfg["reg"]
+    pred_cases = float(reg.predict(X_row)[0])
+    pred_cases = max(0.0, pred_cases)
 
-gate_reg = st.toggle("Gate regressor by classifier decision", value=True)
-pred_cases_display = pred_cases if (not gate_reg or has_case == 1) else 0.0
+    gate_reg = st.toggle("Gate regressor by classifier decision", value=True)
+    pred_cases_display = pred_cases if (not gate_reg or has_case == 1) else 0.0
 
-# ----------------------------
-# Outputs
-# ----------------------------
-k1, k2, k3 = st.columns(3)
-k1.metric("Predicted cases? (0/1)", f"{has_case}")
-k2.metric("Chance of cases (prob model)", f"{p_case*100:.1f}%")
-k3.metric("Predicted # cases", f"{pred_cases_display:.1f}")
+    # ----------------------------
+    # Outputs
+    # ----------------------------
+    k1, k2, k3 = st.columns(3)
+    k1.metric("Predicted cases? (0/1)", f"{has_case}")
+    k2.metric("Chance of cases (prob model)", f"{p_case*100:.1f}%")
+    k3.metric("Predicted # cases", f"{pred_cases_display:.1f}")
 
-# Always show decision text + probability (no debug tables)
-st.write(f"**Prob model:** p={p_case:.4f}")
+    # Always show decision text + probability (no debug tables)
+    st.write(f"**Prob model:** p={p_case:.4f}")
 
-if "gate_clf" in cfg:
-    st.write(f"**Gate model:** p={gate_p:.4f} | thr={gate_thr:.2f} | decision={has_case}")
-else:
-    st.write(f"**Decision rule:** p >= {float(cfg.get('prob_thr', 0.50)):.2f} → {has_case}")
+    if "gate_clf" in cfg:
+        st.write(f"**Gate model:** p={gate_p:.4f} | thr={gate_thr:.2f} | decision={has_case}")
+    else:
+        st.write(f"**Decision rule:** p >= {float(cfg.get('prob_thr', 0.50)):.2f} → {has_case}")
