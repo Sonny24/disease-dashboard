@@ -5,9 +5,6 @@ import pandas as pd
 
 st.set_page_config(page_title="Disease Nowcast", layout="centered")
 
-st.title("🦠 Disease Nowcast")
-st.caption("Pick a disease group + state. App shows P(cases), predicted 0/1, and predicted # cases.")
-
 # ----------------------------
 # Load data
 # ----------------------------
