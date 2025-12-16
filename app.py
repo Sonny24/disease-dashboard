@@ -13,9 +13,11 @@ st.markdown("""
 This dashboard provides an interactive view of weekly case counts for **12 priority infectious disease groups** 
 across the United States.  
 You can:
-- View **national trends** by disease group
-- Compare **state-level patterns** side-by-side
-- Review **peak weekly case counts** for each disease group
+- View national trends by disease group
+- View disease activity week-by-week across the U.S
+- Compare state-level patterns side-by-side
+- Run prediction models on diseases
+- Review peak weekly case counts for each disease group
             
 **Please note that all models used have a degree of uncertainty. Use multiple sources to make any vital decisions.**
 """)
@@ -207,7 +209,7 @@ tb_fig = comp_model.model_treatment_paper(
     plot=True
 )
 
-# NOTE: doesn't work with any other state besides maryland because lack of data 
+# NOTE: doesn't work with any other state besides maryland because lack of data
 zika_fig = comp_model.run_zika_pipeline(
     selected_state,
     weeks_back=100,

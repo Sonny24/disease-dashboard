@@ -139,7 +139,6 @@ def get_vaccination_rates(vacc_name, state):
         return None, None
 
   return results_vacc["year_season"].iloc[0], rate
-#   return results_vacc["year_season"][0], results_vacc["coverage_estimate"][0]
  
 # #Tuberculosis
 
@@ -969,13 +968,6 @@ def run_measles_pipeline(state, weeks_back=30,
 # dict = fit_measles_parameters("Texas", weeks_back=80, obs_model="prevalence")
 # print(dict)
 #Vaccination class is way too high?
-run_measles_pipeline(
-    "Texas",
-    weeks_back=80,
-    forecast_weeks=104,
-    obs_model="incidence",
-    reporting_rate=0.8
-)
 
 # # Hepatitis B
 
@@ -1159,7 +1151,7 @@ def model_hepB(state, weeks_back, weeks_forward, params, verbose = False, y_log 
           if y_log:
             ax.plot(results["t_week"], results["S"], label="Susceptible (S)")
             ax.plot(results["t_week"], results["R"], label="Recovered (R)")
-            ax.yscale("log")
+            ax.set_yscale("log")
           ax.set_title(f"{state} Hepatitis B")
           ax.legend()
 
@@ -1193,10 +1185,5 @@ def run_hepB_pipeline(state, weeks_back, weeks_forward, verbose=False):
       verbose=verbose
   )
   return fig
-#   return results, params
-    
-
-
-# results, params = run_hepB_pipeline("Maryland", weeks_back=10, weeks_forward=10, verbose=True)
 
 
