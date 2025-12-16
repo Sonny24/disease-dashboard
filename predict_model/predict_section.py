@@ -28,8 +28,6 @@ def load_models():
     }
 
 def render_nowcast_section():
-    st.header("Disease Nowcast")
-    st.caption("Predict probability of cases and expected case counts")
 
     df = load_week_to_predict()
     models = load_models()
