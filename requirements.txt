@@ -9,4 +9,4 @@ matplotlib
 scipy
 streamlit
 joblib
-sklearn
+scikit-learn
